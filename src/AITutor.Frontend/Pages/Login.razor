@@ -1,0 +1,110 @@
+@page "/login"
+@using AITutor.Application.DTOs
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="vh-100 d-flex align-center">
+    <MudCard Elevation="4" Class="auth-card glass-panel pa-8">
+        <div class="text-center mb-8">
+            <MudText Typo="Typo.h4" Class="brand-text">Đăng Nhập</MudText>
+            <MudText Typo="Typo.body2">Chào mừng bạn trở lại với AI Tutor</MudText>
+        </div>
+
+        <EditForm Model="@_loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <MudTextField T="string" @bind-Value="_loginModel.Email" Label="Email" 
+                          Variant="Variant.Outlined" FullWidth="true" Class="mb-4" 
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
+            
+            <MudTextField T="string" @bind-Value="_loginModel.Password" Label="Mật khẩu" 
+                          InputType="InputType.Password" Variant="Variant.Outlined" 
+                          FullWidth="true" Class="mb-6"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" 
+                       Color="Color.Primary" FullWidth="true" Size="Size.Large" 
+                       Class="login-btn" Disabled="@_isProcessing">
+                @if (_isProcessing)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Xin chờ...</MudText>
+                }
+                else
+                {
+                    <MudText>Đăng Nhập</MudText>
+                }
+            </MudButton>
+        </EditForm>
+
+        <div class="text-center mt-6">
+            <MudLink href="/register">Chưa có tài khoản? Đăng ký ngay</MudLink>
+        </div>
+    </MudCard>
+</MudContainer>
+
+<style>
+    .vh-100 { min-height: 90vh; }
+    
+    .auth-card {
+        border-radius: 24px;
+        width: 100%;
+        animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .login-btn {
+        background: linear-gradient(135deg, #1746FF 0%, #0077FF 100%);
+        border-radius: 12px;
+        height: 52px;
+        font-weight: 700;
+        text-transform: none;
+        font-size: 1.1rem;
+        box-shadow: 0 10px 20px rgba(23, 70, 255, 0.2);
+    }
+
+    @keyframes cardEnter {
+        from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+</style>
+
+@code {
+    private LoginModel _loginModel = new();
+    private bool _isProcessing = false;
+
+    private async Task HandleLogin()
+    {
+        _isProcessing = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/login", _loginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                if (result != null)
+                {
+                    await LocalStorage.SetItemAsync("authToken", result.Token);
+                    await LocalStorage.SetItemAsync("userData", result);
+                    Snackbar.Add($"Xin chào {result.Username}!", Severity.Success);
+                    Nav.NavigateTo("/");
+                }
+            }
+            else
+            {
+                Snackbar.Add("Sai email hoặc mật khẩu.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Có lỗi xảy ra, vui lòng thử lại.", Severity.Error);
+        }
+        finally { _isProcessing = false; }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

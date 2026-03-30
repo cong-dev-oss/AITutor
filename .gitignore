@@ -1,0 +1,47 @@
+# Built-in Visual Studio .gitignore
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]est[Rr]esult*/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docuser
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Node.js (if any, though we use Blazor)
+node_modules/
+
+# Local configuration
+appsettings.Development.json
+*.local.json
+
+# Tool-specific files
+.pfx
+.publishsettings
+*.suo
+*.user
+*.userosscache
+*.sln.docuser
+
+# Entity Framework
+# Migrations/ (Optionally ignore if you want DB state managed elsewhere, but usually included)
+
+# Docker
+.dockerignore
+
+# API Keys (IMPORTANT)
+appsettings.json

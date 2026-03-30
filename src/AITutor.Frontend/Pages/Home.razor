@@ -1,0 +1,70 @@
+@page "/home"
+@using AITutor.Application.DTOs
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager nav
+
+<MudText Typo="Typo.h4" Class="brand-text mb-8">Dashboard Học Tập</MudText>
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="4" Class="glass-panel pa-6 text-center">
+            <MudAvatar Color="Color.Primary" Style="height:100px; width:100px; font-size:2rem;" Class="mx-auto mb-4">@(_userData?.Username?.Substring(0,1).ToUpper() ?? "U")</MudAvatar>
+            <MudText Typo="Typo.h5">@_userData?.Username</MudText>
+            <MudText Typo="Typo.body2">Level hiện tại: <MudChip T="string" Color="Color.Primary" Size="Size.Small">@(_userData?.CurrentLevel ?? "A1")</MudChip></MudText>
+            
+            <MudDivider Class="my-4" />
+            
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" OnClick="@(() => nav.NavigateTo("/assessment"))">
+                Làm lại bài Test Level
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="4" Class="glass-panel pa-6 d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Chat" Size="Size.Large" Color="Color.Info" Class="mr-4" />
+                    <div>
+                        <MudText Typo="Typo.h6">Bắt đầu Chat</MudText>
+                        <MudText Typo="Typo.body2">Luyện tập cùng Tutor AI ngay</MudText>
+                        <MudButton Variant="Variant.Text" Color="Color.Info" Class="pa-0" OnClick="@(() => nav.NavigateTo("/"))">Đi tới khung chat -></MudButton>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="4" Class="glass-panel pa-6 d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Success" Class="mr-4" />
+                    <div>
+                        <MudText Typo="Typo.h6">Tài liệu</MudText>
+                        <MudText Typo="Typo.body2">Quản lý các PDF bạn đã tải lên</MudText>
+                        <MudButton Variant="Variant.Text" Color="Color.Success" Class="pa-0" OnClick="@(() => nav.NavigateTo("/documents"))">Xem tài liệu -></MudButton>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12">
+                <MudPaper Elevation="4" Class="glass-panel pa-6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Tiến Độ Gần Đây</MudText>
+                    <MudProgressLinear Color="Color.Primary" Value="60" Size="Size.Large" Class="my-4">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit"><b>60% bài học hôm nay đã xong</b></MudText>
+                    </MudProgressLinear>
+                    <MudText Typo="Typo.body2">Dựa trên lịch sử, bạn đang mạnh nhất ở "Present Simple" và cần cải thiện "Listening".</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private AuthResponse? _userData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userData = await LocalStorage.GetItemAsync<AuthResponse>("userData");
+        if (_userData == null)
+        {
+            nav.NavigateTo("/login");
+        }
+    }
+}
