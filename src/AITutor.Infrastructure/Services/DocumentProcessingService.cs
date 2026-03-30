@@ -1,5 +1,4 @@
 using AITutor.Application.Interfaces.Services;
-using Ubiety.StringReplacer;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using System.Text.RegularExpressions;

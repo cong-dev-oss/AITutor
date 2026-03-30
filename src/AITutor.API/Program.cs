@@ -1,3 +1,4 @@
+using System.Text;
 using AITutor.Infrastructure.Data;
 using AITutor.Infrastructure.Services;
 using AITutor.Application.Interfaces.Repositories;
@@ -20,7 +21,9 @@ var kernelBuilder = Kernel.CreateBuilder();
 if (aiConfig["Provider"] == "OpenAI")
 {
     kernelBuilder.AddOpenAIChatCompletion(aiConfig["ModelId"]!, aiConfig["ApiKey"]!);
+#pragma warning disable SKEXP0010
     kernelBuilder.AddOpenAITextEmbeddingGeneration(aiConfig["EmbeddingModelId"]!, aiConfig["ApiKey"]!);
+#pragma warning restore SKEXP0010
 }
 // Add other providers here if needed (Gemini, Groq etc via SK connectors)
 

@@ -1,0 +1,25 @@
+# Logs
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+
+# Build files
+.next/
+.cache/
+.vite
+build/
+
+# Editor
+.vscode
+.idea
+.DS_Store
+*.suo
+*.sln
+*.swp
+*.bat
+!setup_react_frontend.bat (removed manually anyway)
+*.log

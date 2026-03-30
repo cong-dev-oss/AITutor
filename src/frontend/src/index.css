@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 40% 98%; /* #faf9f6 - White Cream */
+    --foreground: 220 20% 12%; /* #1e1f24 - Deep Charcoal */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 220 20% 12%; /* Deep Charcoal */
+    --primary-foreground: 40 40% 98%;
+    --secondary: 40 20% 92%; /* Soft cream */
+    --secondary-foreground: 220 20% 12%;
+    --muted: 40 20% 92%;
+    --muted-foreground: 215 16% 47%; /* Mid grey */
+    --accent: 40 20% 92%;
+    --accent-foreground: 220 20% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 40 40% 98%;
+    --border: 40 20% 88%; /* #e1ded3 */
+    --input: 40 20% 88%;
+    --ring: 220 20% 12%;
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 220 20% 3%;
+    --foreground: 40 10% 90%;
+    /* ... rest omit ... */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: radial-gradient(#e1ded3 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    background-color: hsl(var(--background));
+  }
+  
+  h1, h2, h3, h4, h5, h6, .font-serif {
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.02em;
+  }
+}

@@ -3,6 +3,7 @@ using AITutor.Application.Interfaces.Repositories;
 using AITutor.Application.Interfaces.Services;
 using AITutor.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using BCrypt.Net;
 
 namespace AITutor.API.Controllers;
 

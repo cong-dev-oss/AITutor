@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AITutor.Infrastructure", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AITutor.API", "AITutor.API\AITutor.API.csproj", "{24EE578E-0EF2-458B-B080-E523F650844B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AITutor.Frontend", "AITutor.Frontend\AITutor.Frontend.csproj", "{742F20FD-E480-4850-9FDF-5A9930194393}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,18 +69,6 @@ Global
 		{24EE578E-0EF2-458B-B080-E523F650844B}.Release|x64.Build.0 = Release|Any CPU
 		{24EE578E-0EF2-458B-B080-E523F650844B}.Release|x86.ActiveCfg = Release|Any CPU
 		{24EE578E-0EF2-458B-B080-E523F650844B}.Release|x86.Build.0 = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|x64.Build.0 = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Debug|x86.Build.0 = Debug|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|Any CPU.Build.0 = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|x64.ActiveCfg = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|x64.Build.0 = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|x86.ActiveCfg = Release|Any CPU
-		{742F20FD-E480-4850-9FDF-5A9930194393}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
