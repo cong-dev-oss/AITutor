@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import api from '../lib/api';
 import * as signalR from '@microsoft/signalr';
 import { SendHorizonal, Bot, User, Loader2, Sparkles } from 'lucide-react';
 
@@ -11,15 +12,33 @@ interface ChatMessage {
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [topic, setTopic] = useState('Grammar: Present Simple');
+  const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+  const [topic, setTopic] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMessages([
-      { text: "Chào mừng bạn! Hôm nay chúng ta sẽ học về Hiện tại đơn. Bạn có thắc mắc gì không?", isUser: false, timestamp: new Date() }
-    ]);
+    const fetchTopics = async () => {
+      try {
+        const { data } = await api.get('/documents');
+        const topics = Array.from(new Set(data.map((d: any) => d.topic))) as string[];
+        setAvailableTopics(topics);
+        if (topics.length > 0) {
+          setTopic(topics[0]);
+          setMessages([
+            { text: `Chào mừng bạn! Hôm nay chúng ta sẽ cùng học về chủ đề "${topics[0]}". Bạn muốn bắt đầu từ đâu?`, isUser: false, timestamp: new Date() }
+          ]);
+        } else {
+          setMessages([
+            { text: "Chào mừng bạn! Thư viện hiện chưa có tài liệu. Vui lòng tải lên tài liệu để bắt đầu học tập.", isUser: false, timestamp: new Date() }
+          ]);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách chủ đề:", err);
+      }
+    };
+    fetchTopics();
 
     const token = localStorage.getItem('authToken');
     if (!token) return;
@@ -67,7 +86,7 @@ export default function Chat() {
   }, [messages, isTyping]);
 
   const sendMessage = async () => {
-    if (!input.trim() || !connection || connection.state !== signalR.HubConnectionState.Connected) return;
+    if (!input.trim() || !connection || connection.state !== signalR.HubConnectionState.Connected || !topic) return;
 
     const messageText = input;
     setInput('');
@@ -90,63 +109,57 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-full flex flex-col py-4 max-w-4xl mx-auto w-full">
+    <div className="h-full flex flex-col w-full animate-in fade-in duration-500 bg-background text-foreground">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-border/60">
-        <div>
-          <h1 className="text-3xl font-serif text-primary font-bold italic flex items-center gap-2">
-            Học cùng AI Tutor
-            <Sparkles className="w-5 h-5 text-stone-400" />
-          </h1>
-          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground mt-1 font-serif">
-            Hội thoại thực hành
-          </p>
+      <div className="sticky top-0 z-10 flex items-center justify-between py-3 px-4 md:px-0 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          {availableTopics.length > 0 ? (
+            <select 
+              value={topic}
+              onChange={(e) => {
+                setTopic(e.target.value);
+                setMessages(prev => [...prev, { text: `💻 Hệ thống: Đã chuyển ngữ cảnh sang chủ đề "${e.target.value}".`, isUser: false, timestamp: new Date() }]);
+              }}
+              className="w-auto border-none bg-transparent py-1 text-sm focus-visible:outline-none focus-visible:ring-0 font-semibold cursor-pointer text-foreground hover:bg-secondary rounded px-2 transition-colors uppercase tracking-tight"
+            >
+              {availableTopics.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-sm font-medium text-muted-foreground px-2">Chưa có tài liệu học tập</span>
+          )}
         </div>
-        
-        <div className="mt-4 sm:mt-0">
-          <select 
-            value={topic}
-            onChange={(e) => {
-              setTopic(e.target.value);
-              setMessages([{ text: `Đã chuyển sang chủ đề: ${e.target.value}. Bắt đầu thôi!`, isUser: false, timestamp: new Date() }]);
-            }}
-            className="w-full sm:w-64 border border-border bg-card px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm shadow-sm transition-colors text-primary font-medium"
-          >
-            <option value="Grammar: Present Simple">Hiện tại đơn</option>
-            <option value="Vocab: Restaurant">Từ vựng Nhà hàng</option>
-            <option value="Grammar: Passive Voice">Bị động</option>
-            <option value="Conversation: Travel">Hội thoại Du lịch</option>
-          </select>
+        <div>
+          {/* Action buttons could go here */}
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto mb-4 p-4 rounded-sm border border-border bg-card/60 shadow-inner scroll-smooth">
-        <div className="space-y-6">
+      <div className="flex-1 overflow-y-auto scroll-smooth pb-32 pt-8">
+        <div className="flex flex-col space-y-8 w-full">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex gap-3 max-w-[85%] ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div key={i} className={`flex w-full ${msg.isUser ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300 ease-out`}>
+              <div className={`flex gap-4 max-w-[85%] lg:max-w-[80%] ${msg.isUser ? 'flex-row-reverse' : 'flex-row'} items-start`}>
                 
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm border
-                  ${msg.isUser ? 'bg-primary text-primary-foreground border-primary' : 'bg-[#f0ece1] text-primary border-[#e6dfd1]'}
+                {/* Avatar */}
+                <div className={`w-8 h-8 rounded-sm flex items-center justify-center flex-shrink-0 border mt-0.5
+                  ${msg.isUser ? 'bg-secondary text-secondary-foreground border-border' : 'bg-primary text-primary-foreground border-primary'}
                 `}>
-                  {msg.isUser ? <User className="w-4 h-4" /> : <Bot className="w-5 h-5" />}
+                  {msg.isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                 </div>
 
-                <div className={`px-5 py-3.5 shadow-sm 
+                {/* Message Bubble (Flat style like ChatGPT/Platform) */}
+                <div className={`py-1.5 flex flex-col gap-1
                   ${msg.isUser 
-                    ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-sm rounded-br-2xl rounded-bl-2xl border border-primary/90' 
-                    : 'bg-white text-primary rounded-tr-2xl rounded-tl-sm rounded-br-2xl rounded-bl-2xl border border-border'}
+                    ? 'items-end' 
+                    : 'items-start'}
                 `}>
-                  <p className="text-[15px] leading-relaxed whitespace-pre-wrap font-medium font-sans">
+                  <p className={`text-base leading-relaxed whitespace-pre-wrap ${msg.isUser ? 'text-right' : 'text-left'}`}>
                     {msg.text}
                   </p>
-                  <span className={`text-[10px] uppercase font-serif tracking-widest block mt-2 opacity-60
-                    ${msg.isUser ? 'text-right' : 'text-left'}
-                  `}>
-                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  
                 </div>
 
               </div>
@@ -154,44 +167,54 @@ export default function Chat() {
           ))}
 
           {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex gap-3 max-w-[80%] flex-row">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm border bg-[#f0ece1] text-primary border-[#e6dfd1]">
-                  <Bot className="w-5 h-5 opacity-70" />
-                </div>
-                <div className="px-5 py-3.5 shadow-sm bg-white text-primary rounded-tr-2xl rounded-tl-sm rounded-br-2xl rounded-bl-2xl border border-border flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin opacity-50" />
-                  <span className="text-sm font-serif italic text-muted-foreground">Tutor đang soạn câu phản hồi...</span>
-                </div>
-              </div>
+            <div className="flex justify-start animate-in fade-in duration-300">
+               <div className="flex gap-4 max-w-[80%] flex-row items-start">
+                  <div className="w-8 h-8 rounded-sm flex items-center justify-center flex-shrink-0 mt-0.5 border bg-primary text-primary-foreground border-primary">
+                    <Sparkles className="w-4 h-4 opacity-70" />
+                  </div>
+                  <div className="py-2 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  </div>
+               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
 
       {/* Input Area */}
-      <div className="p-2 bg-card border border-border shadow-sm rounded-sm flex items-end gap-2 transition-shadow focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Nhập nội dung hội thoại..."
-          className="w-full bg-transparent px-3 py-3 max-h-32 min-h-12 resize-none outline-none leading-relaxed text-[15px]"
-          rows={1}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!input.trim() || isTyping || !connection || connection.state !== signalR.HubConnectionState.Connected}
-          className="p-3 mb-1 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 disabled:opacity-50 transition-colors flex-shrink-0 ml-2 shadow-inner"
-        >
-          <SendHorizonal className="w-5 h-5" />
-        </button>
+      <div className="absolute bottom-0 w-full left-0 bg-gradient-to-t from-background via-background/90 to-transparent pt-10 pb-6 px-4 md:px-0 z-20">
+        <div className="max-w-3xl mx-auto w-full relative">
+          <div className="flex items-end bg-card border border-border shadow-sm rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-200">
+            <textarea
+              ref={(el) => {
+                if (el) {
+                  el.style.height = '0px';
+                  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+                }
+              }}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Gửi tin nhắn cho AI Tutor..."
+              className="flex-1 bg-transparent px-4 py-3.5 max-h-[200px] min-h-[52px] resize-none outline-none leading-relaxed text-base placeholder:text-muted-foreground/60 text-foreground"
+              rows={1}
+            />
+            <div className="pr-2 pb-2">
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || isTyping || !connection || connection.state !== signalR.HubConnectionState.Connected}
+                className="p-2 bg-primary text-primary-foreground rounded-xl hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-20 transition-all flex items-center justify-center shadow-sm"
+              >
+                <SendHorizonal className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          <div className="text-center mt-3">
+            <span className="text-[11px] text-muted-foreground font-medium opacity-60">AI Tutor có thể mắc lỗi. Vui lòng kiểm tra lại thông tin quan trọng.</span>
+          </div>
+        </div>
       </div>
-      <p className="text-[10px] text-center text-muted-foreground/60 uppercase tracking-widest font-serif mt-2">
-        Nhấn Enter để gửi phản hồi, Shift + Enter để xuống dòng
-      </p>
-
     </div>
   );
 }

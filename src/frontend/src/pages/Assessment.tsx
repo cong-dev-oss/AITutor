@@ -60,28 +60,28 @@ export default function Assessment() {
 
   if (loading || !questions) {
     return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-muted-foreground">
+      <div className="flex flex-col items-center justify-center h-[70vh] text-muted-foreground bg-background">
         <Loader2 className="w-8 h-8 animate-spin mb-4" />
-        <p className="font-serif italic font-semibold">Tutor đang soạn bài thi từ tài liệu của bạn...</p>
+        <p className="font-medium text-sm">Đang tải biểu mẫu đánh giá...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <div className="bg-card border border-border/80 shadow-sm p-8 max-w-2xl mx-auto rounded-sm">
+    <div className="w-full mx-auto py-8">
+      <div className="bg-card border border-border shadow-sm p-8 rounded-lg max-w-3xl mx-auto">
         
         {!isFinished ? (
           <div className="animate-in fade-in duration-500">
-            <div className="text-center mb-8 pb-6 border-b border-border/50">
-              <h2 className="text-2xl font-serif text-primary italic font-bold">Kiểm Tra Trình Độ</h2>
-              <p className="text-muted-foreground mt-2 text-sm uppercase tracking-widest">
+            <div className="flex justify-between items-end mb-8 pb-4 border-b border-border">
+              <h2 className="text-xl font-bold text-foreground">Đánh giá Năng lực</h2>
+              <span className="text-sm font-medium text-muted-foreground">
                 Câu {currentIdx + 1} / {questions.length}
-              </p>
+              </span>
             </div>
 
-            <div className="bg-[#f0ece1] p-6 lg:p-8 rounded-sm mb-6 border border-[#e6dfd1] shadow-inner">
-              <p className="text-lg text-primary font-medium leading-relaxed">
+            <div className="mb-8 p-6 bg-secondary/30 rounded-lg">
+              <p className="text-lg text-foreground font-medium leading-relaxed">
                 {questions[currentIdx].question}
               </p>
             </div>
@@ -90,10 +90,10 @@ export default function Assessment() {
               {questions[currentIdx].options.map((opt, idx) => (
                 <label 
                   key={idx} 
-                  className={`flex items-center p-4 border rounded-sm cursor-pointer transition-colors
+                  className={`flex items-center p-4 border rounded-md cursor-pointer transition-all duration-200
                     ${selectedOption === idx 
-                      ? 'bg-stone-200/50 border-primary border-l-4 text-primary font-medium' 
-                      : 'border-border hover:bg-stone-50 text-muted-foreground hover:text-primary'}
+                      ? 'bg-primary/5 border-primary text-foreground font-medium' 
+                      : 'border-border hover:bg-secondary/50 text-muted-foreground hover:text-foreground'}
                   `}
                 >
                   <input 
@@ -103,9 +103,11 @@ export default function Assessment() {
                     checked={selectedOption === idx}
                     onChange={() => setSelectedOption(idx)} 
                   />
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center border border-current mr-4 text-sm flex-shrink-0 opacity-70">
-                    {String.fromCharCode(65 + idx)}
-                  </span>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-4 flex-shrink-0 transition-colors
+                    ${selectedOption === idx ? 'border-primary' : 'border-muted-foreground/50'}
+                  `}>
+                    {selectedOption === idx && <div className="w-2.5 h-2.5 bg-primary rounded-full" />}
+                  </div>
                   <span>{opt}</span>
                 </label>
               ))}
@@ -115,29 +117,29 @@ export default function Assessment() {
               <button 
                 onClick={handleNext}
                 disabled={selectedOption === null}
-                className="bg-primary text-primary-foreground px-8 py-3 rounded-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                className="bg-primary text-primary-foreground px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all active:scale-[0.98]"
               >
-                {currentIdx + 1 >= questions.length ? 'Hoàn thành' : 'Câu tiếp theo'}
+                {currentIdx + 1 >= questions.length ? 'Hoàn thành bài thi' : 'Tiếp tục'}
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 animate-in fade-in zoom-in duration-500">
-            <CheckCircle className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
-            <h2 className="text-3xl font-serif text-primary italic font-bold mb-4">Chúc mừng!</h2>
-            <p className="text-muted-foreground mb-6">Bạn đã hoàn thành bài kiểm tra đầu vào.</p>
+          <div className="text-center py-16 animate-in fade-in zoom-in duration-500">
+            <CheckCircle className="w-16 h-16 text-primary mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-foreground mb-4">Đánh giá thành công</h2>
+            <p className="text-muted-foreground mb-10 text-sm">Hệ thống đã cập nhật lộ trình học tập cá nhân hóa cho bạn.</p>
             
-            <div className="inline-block border-2 border-primary/20 px-8 py-4 mb-8 bg-[#fdfbf7]">
-              <p className="text-sm uppercase tracking-widest text-muted-foreground mb-1">Trình độ đề xuất</p>
-              <p className="text-4xl font-serif text-primary font-bold">{newLevel}</p>
+            <div className="inline-block border border-border rounded-lg px-12 py-6 mb-10 bg-secondary/30">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Trình độ tương đương</p>
+              <p className="text-4xl font-bold text-foreground">{newLevel}</p>
             </div>
 
             <div>
               <button 
                 onClick={() => navigate('/')}
-                className="bg-primary text-primary-foreground px-8 py-3 rounded-sm font-medium hover:bg-primary/90 shadow-inner flex items-center justify-center gap-2 mx-auto"
+                className="bg-primary text-primary-foreground px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 mx-auto active:scale-[0.98]"
               >
-                <BookOpen className="w-5 h-5" /> Bắt đầu khóa học
+                <BookOpen className="w-4 h-4" /> Bắt đầu luyện tập
               </button>
             </div>
           </div>

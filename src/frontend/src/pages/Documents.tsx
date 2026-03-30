@@ -64,39 +64,45 @@ export default function Documents() {
   };
 
   return (
-    <div className="py-8">
-      <h1 className="text-3xl font-serif text-primary font-bold italic mb-8">Thư Viện Tài Liệu</h1>
+    <div className="py-8 w-full mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Thư viện Tài liệu</h1>
+          <p className="text-sm text-muted-foreground mt-1">Quản lý các tài liệu nền tảng cho AI Tutor</p>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Upload Form */}
-        <div className="md:col-span-1">
-          <div className="bg-card border border-border/80 p-6 rounded-sm shadow-sm sticky top-6">
-            <h2 className="text-lg font-serif font-bold text-primary mb-6 flex items-center gap-2">
-              <FileUp className="w-5 h-5 opacity-70" /> Tải lên tài liệu mới
+        <div className="lg:col-span-1">
+          <div className="bg-card border border-border p-6 rounded-lg shadow-sm sticky top-6">
+            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+              <FileUp className="w-5 h-5" /> Tải lên tài liệu mới
             </h2>
             
             <div className="space-y-4">
-              <div>
-                <label className="text-xs font-serif uppercase tracking-wider text-muted-foreground mb-1 block">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
                   Chủ đề (VD: Grammar)
                 </label>
                 <input 
                   type="text" 
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  className="w-full border border-border bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm transition-colors"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md transition-colors"
+                  placeholder="Nhập tên bài học..."
                 />
               </div>
               
-              <div>
-                <label className="text-xs font-serif uppercase tracking-wider text-muted-foreground mb-1 block">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
                   Độ khó
                 </label>
                 <select 
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full border border-border bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm transition-colors"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md transition-colors"
                 >
                   <option value="Beginner">Cơ bản (A1-A2)</option>
                   <option value="Intermediate">Trung cấp (B1-B2)</option>
@@ -106,11 +112,11 @@ export default function Documents() {
 
               <div className="pt-4">
                 <label className={`
-                  flex items-center justify-center p-4 border-2 border-dashed border-border/60 rounded-sm cursor-pointer whitespace-nowrap text-sm font-medium transition-colors
-                  ${uploading ? 'bg-stone-100 opacity-50 cursor-not-allowed' : 'hover:bg-stone-50 hover:border-primary/50 text-primary'}
+                  flex items-center justify-center p-4 border-2 border-dashed border-border rounded-md cursor-pointer whitespace-nowrap text-sm font-medium transition-all duration-200
+                  ${uploading ? 'bg-secondary/50 opacity-50 cursor-not-allowed' : 'hover:bg-secondary/50 hover:border-primary/50 text-foreground'}
                 `}>
                   <FileText className="w-4 h-4 mr-2" />
-                  {uploading ? 'Đang tải (RAG)...' : 'Chọn File PDF'}
+                  {uploading ? 'Đang tải lên...' : 'Chọn File PDF'}
                   <input 
                     type="file" 
                     accept=".pdf" 
@@ -125,36 +131,36 @@ export default function Documents() {
         </div>
 
         {/* Document List */}
-        <div className="md:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
           {loading ? (
              <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
                 <div className="w-6 h-6 border-2 border-primary/50 border-t-primary rounded-full animate-spin mb-4" />
-                <p className="font-serif italic text-sm">Đang tải danh mục...</p>
+                <p className="text-sm font-medium">Đang tải danh sách...</p>
              </div>
           ) : documents.length === 0 ? (
-            <div className="bg-card border border-border/80 border-dashed p-12 text-center rounded-sm">
+            <div className="bg-card border border-border border-dashed p-12 text-center rounded-lg">
                <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-               <p className="font-serif text-muted-foreground text-sm uppercase tracking-wider">Chưa có tài liệu nào</p>
+               <p className="text-muted-foreground text-sm font-medium">Chưa có tài liệu nào</p>
             </div>
           ) : (
-             <div className="bg-card border border-border/80 rounded-sm overflow-hidden shadow-sm">
+             <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-[#f0ece1]/50 border-b border-border/80 text-muted-foreground font-serif uppercase tracking-widest text-[10px]">
+                  <thead className="bg-secondary/50 border-b border-border text-muted-foreground font-medium text-xs uppercase">
                     <tr>
-                      <th className="px-6 py-4 font-semibold">Tên Tài Liệu</th>
-                      <th className="px-6 py-4 font-semibold">Môn học</th>
-                      <th className="px-6 py-4 font-semibold text-center">Trạng thái</th>
+                      <th className="px-6 py-4">Tên Tài Liệu</th>
+                      <th className="px-6 py-4">Chủ đề</th>
+                      <th className="px-6 py-4 text-center">Trạng thái</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/50">
+                  <tbody className="divide-y divide-border">
                     {documents.map((doc) => (
-                      <tr key={doc.id} className="hover:bg-stone-50/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-primary">
+                      <tr key={doc.id} className="hover:bg-secondary/30 transition-colors">
+                        <td className="px-6 py-4 font-medium text-foreground">
                           <div className="flex items-center">
-                            <FileText className="w-4 h-4 mr-3 opacity-50" />
+                            <FileText className="w-4 h-4 mr-3 text-muted-foreground" />
                             {doc.fileName}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1 ml-7 opacity-70">
+                          <div className="text-xs text-muted-foreground mt-1 ml-7">
                             {new Date(doc.uploadedAt).toLocaleDateString('vi-VN')}
                           </div>
                         </td>
@@ -163,11 +169,11 @@ export default function Documents() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           {doc.isProcessed ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#e6f4ea] text-[#1e8e3e]">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                               <CheckCircle className="w-3 h-3" /> Sẵn sàng
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#fef7e0] text-[#b06000]">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
                               <Clock className="w-3 h-3" /> Đang xử lý
                             </span>
                           )}
