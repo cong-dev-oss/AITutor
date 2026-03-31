@@ -36,7 +36,8 @@ public class TutorAgentService : ITutorAgentService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // 1. RAG: Search for relevant knowledge
-        var searchResults = await _vectorDb.SearchAsync("Knowledge_Base", userMessage, topK: 3);
+        await _vectorDb.EnsureCollectionExistsAsync("Knowledge_Base_Ollama");
+        var searchResults = await _vectorDb.SearchAsync("Knowledge_Base_Ollama", userMessage, topK: 3);
         var contextBuilder = new StringBuilder();
         foreach (var res in searchResults)
         {

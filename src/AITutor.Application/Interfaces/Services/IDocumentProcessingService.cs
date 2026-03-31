@@ -4,4 +4,7 @@ public interface IDocumentProcessingService
 {
     /// <summary>Trích xuất text từ file PDF và chia nhỏ thành chunks.</summary>
     Task<IEnumerable<string>> ExtractAndChunkAsync(Stream fileStream, int chunkSize = 800, int overlap = 100);
+
+    /// <summary>Chia nhỏ text trực tiếp thành chunks (dành cho URL/text).</summary>
+    Task<IEnumerable<string>> ExtractAndChunkTextAsync(string text, int chunkSize = 800, int overlap = 100);
 }

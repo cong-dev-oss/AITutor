@@ -11,21 +11,73 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.SemanticKernel.Connectors.Ollama;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OllamaSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ─── AI Configuration ─────────────────────────────────────────────────────────
 var aiConfig = builder.Configuration.GetSection("AI");
+var chatConfig = aiConfig.GetSection("Chat");
+var embedConfig = aiConfig.GetSection("Embedding");
+
 var kernelBuilder = Kernel.CreateBuilder();
 
-if (aiConfig["Provider"] == "OpenAI")
+// 1. Setup Chat Completion
+if (chatConfig["Provider"] == "Gemini")
 {
-    kernelBuilder.AddOpenAIChatCompletion(aiConfig["ModelId"]!, aiConfig["ApiKey"]!);
+#pragma warning disable SKEXP0070
+    kernelBuilder.AddGoogleAIGeminiChatCompletion(
+        modelId: chatConfig["ModelId"]!,
+        apiKey: chatConfig["ApiKey"]!,
+        apiVersion: GoogleAIVersion.V1);
+#pragma warning restore SKEXP0070
+}
+else if (chatConfig["Provider"] == "OpenAI")
+{
+    kernelBuilder.AddOpenAIChatCompletion(chatConfig["ModelId"]!, chatConfig["ApiKey"]!);
+}
+else if (chatConfig["Provider"] == "Ollama")
+{
+#pragma warning disable SKEXP0070
+    // Cấu hình Timeout thông qua HttpClient cho Ollama
+    builder.Services.AddHttpClient("OllamaClient", client => {
+        client.BaseAddress = new Uri(chatConfig["Host"]!);
+        client.Timeout = TimeSpan.FromMinutes(5);
+    });
+
+    kernelBuilder.AddOllamaChatCompletion(
+        modelId: chatConfig["ModelId"]!,
+        endpoint: new Uri(chatConfig["Host"]!));
+#pragma warning restore SKEXP0070
+}
+
+// 2. Setup Embedding Generation
+if (embedConfig["Provider"] == "OpenAI")
+{
 #pragma warning disable SKEXP0010
-    kernelBuilder.AddOpenAITextEmbeddingGeneration(aiConfig["EmbeddingModelId"]!, aiConfig["ApiKey"]!);
+    kernelBuilder.AddOpenAITextEmbeddingGeneration(embedConfig["ModelId"]!, embedConfig["ApiKey"]!);
 #pragma warning restore SKEXP0010
 }
-// Add other providers here if needed (Gemini, Groq etc via SK connectors)
+else if (embedConfig["Provider"] == "Gemini")
+{
+#pragma warning disable SKEXP0070
+    kernelBuilder.AddGoogleAIEmbeddingGeneration(
+        modelId: embedConfig["ModelId"]!,
+        apiKey: embedConfig["ApiKey"]!,
+        apiVersion: GoogleAIVersion.V1); 
+#pragma warning restore SKEXP0070
+}
+else if (embedConfig["Provider"] == "Ollama")
+{
+#pragma warning disable SKEXP0070
+    kernelBuilder.AddOllamaTextEmbeddingGeneration(
+        modelId: embedConfig["ModelId"]!,
+        endpoint: new Uri(embedConfig["Host"]!));
+#pragma warning restore SKEXP0070
+}
 
 var kernel = kernelBuilder.Build();
 builder.Services.AddSingleton(kernel);
@@ -88,7 +140,7 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
-        policy.WithOrigins("http://localhost:5173", "https://localhost:7001")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());

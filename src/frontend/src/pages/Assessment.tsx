@@ -24,9 +24,14 @@ export default function Assessment() {
     const fetchQuestions = async () => {
       try {
         const { data } = await api.get('/placement-test/generate');
-        setQuestions(data);
+        if (Array.isArray(data)) {
+          setQuestions(data);
+        } else {
+          setQuestions([]);
+        }
       } catch (err) {
         console.error('Lỗi khi lấy câu hỏi test.', err);
+        setQuestions([]);
       } finally {
         setLoading(false);
       }
@@ -35,7 +40,7 @@ export default function Assessment() {
   }, []);
 
   const handleNext = async () => {
-    if (questions && selectedOption === questions[currentIdx].correctIndex) {
+    if (questions && questions[currentIdx] && selectedOption === questions[currentIdx].correctIndex) {
       setScore(s => s + 1);
     }
     
@@ -49,7 +54,7 @@ export default function Assessment() {
 
   const submitResult = async () => {
     try {
-      const currentScore = (questions && selectedOption === questions[currentIdx].correctIndex) ? score + 1 : score;
+      const currentScore = (questions && questions[currentIdx] && selectedOption === questions[currentIdx].correctIndex) ? score + 1 : score;
       const { data } = await api.post('/placement-test/submit', currentScore);
       setNewLevel(data.newLevel || 'A1');
       setIsFinished(true);
@@ -58,11 +63,21 @@ export default function Assessment() {
     }
   };
 
-  if (loading || !questions) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] text-muted-foreground bg-background">
         <Loader2 className="w-8 h-8 animate-spin mb-4" />
         <p className="font-medium text-sm">Đang tải biểu mẫu đánh giá...</p>
+      </div>
+    );
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] text-muted-foreground bg-background">
+        <BookOpen className="w-8 h-8 opacity-20 mb-4" />
+        <p className="font-medium text-sm">Không thể tạo câu hỏi ngay lúc này. Vui lòng thử lại sau.</p>
+        <button onClick={() => navigate('/')} className="mt-4 text-xs font-semibold text-primary">Quay về Trang chủ</button>
       </div>
     );
   }

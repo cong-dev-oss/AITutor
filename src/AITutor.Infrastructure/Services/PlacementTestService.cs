@@ -20,7 +20,8 @@ public class PlacementTestService
     public async Task<List<QuestionDto>> GenerateTestAsync(string topic = "General English")
     {
         // 1. Get random context from Vector DB (if any)
-        var contextResults = await _vectorDb.SearchAsync("Knowledge_Base", topic, topK: 5);
+        await _vectorDb.EnsureCollectionExistsAsync("Knowledge_Base_Ollama");
+        var contextResults = await _vectorDb.SearchAsync("Knowledge_Base_Ollama", topic, topK: 5);
         var context = string.Join("\n", contextResults.Select(r => r.ChunkText));
 
         // 2. Prompt LLM to generate 5 multiple choice questions
@@ -29,13 +30,13 @@ public class PlacementTestService
             {{context}}
 
             Hãy tạo 5 câu hỏi trắc nghiệm tiếng Anh để đánh giá trình độ (A1-C1). 
-            Trả về định dạng JSON duy nhất là một mảng các đối tượng:
+            Trả về định dạng JSON duy nhất là một mảng các đối tượng (TẤT CẢ TÊN THUỘC TÍNH PHẢI VIẾT THƯỜNG):
             [
               {
-                "Question": "...",
-                "Options": ["A", "B", "C", "D"],
-                "CorrectIndex": 0,
-                "Explanation": "..."
+                "question": "...",
+                "options": ["A", "B", "C", "D"],
+                "correctIndex": 0,
+                "explanation": "..."
               }
             ]
             Chỉ trả về JSON, không thêm văn bản khác.
@@ -49,7 +50,8 @@ public class PlacementTestService
 
         try
         {
-            return JsonSerializer.Deserialize<List<QuestionDto>>(json) ?? new();
+            var serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            return JsonSerializer.Deserialize<List<QuestionDto>>(json, serializerOptions) ?? new();
         }
         catch
         {

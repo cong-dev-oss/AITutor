@@ -44,7 +44,7 @@ export default function Chat() {
     if (!token) return;
 
     const newConn = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000/hubs/chat", {
+      .withUrl("http://localhost:5154/hubs/chat", {
         accessTokenFactory: () => token
       })
       .withAutomaticReconnect()

@@ -10,7 +10,12 @@ public class DocumentProcessingService : IDocumentProcessingService
     public async Task<IEnumerable<string>> ExtractAndChunkAsync(Stream fileStream, int chunkSize = 800, int overlap = 100)
     {
         var text = ExtractTextFromPdf(fileStream);
-        return RecursiveCharacterSplit(text, chunkSize, overlap);
+        return await Task.FromResult(RecursiveCharacterSplit(text, chunkSize, overlap));
+    }
+
+    public async Task<IEnumerable<string>> ExtractAndChunkTextAsync(string text, int chunkSize = 800, int overlap = 100)
+    {
+        return await Task.FromResult(RecursiveCharacterSplit(text, chunkSize, overlap));
     }
 
     private string ExtractTextFromPdf(Stream stream)

@@ -25,5 +25,11 @@ public class DocumentRepository : IDocumentRepository
         return Task.CompletedTask;
     }
 
+    public Task DeleteAsync(Document document)
+    {
+        _db.Documents.Remove(document);
+        return Task.CompletedTask;
+    }
+
     public Task SaveChangesAsync() => _db.SaveChangesAsync();
 }

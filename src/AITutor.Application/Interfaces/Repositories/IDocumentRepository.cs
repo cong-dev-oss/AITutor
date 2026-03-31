@@ -8,5 +8,6 @@ public interface IDocumentRepository
     Task<IEnumerable<Document>> GetByUserIdAsync(Guid userId);
     Task AddAsync(Document document);
     Task UpdateAsync(Document document);
+    Task DeleteAsync(Document document);
     Task SaveChangesAsync();
 }

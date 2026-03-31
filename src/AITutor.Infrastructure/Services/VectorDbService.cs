@@ -1,8 +1,11 @@
+using System.Linq;
+using System.Collections.Generic;
 using AITutor.Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel.Embeddings;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
+using Condition = Qdrant.Client.Grpc.Condition;
 
 namespace AITutor.Infrastructure.Services;
 
@@ -25,8 +28,15 @@ public class VectorDbService : IVectorDbService
         var collections = await _client.ListCollectionsAsync();
         if (!collections.Contains(collectionName))
         {
-            // By default, text-embedding-3-small uses 1536 dims
-            await _client.CreateCollectionAsync(collectionName, new VectorParams { Size = 1536, Distance = Distance.Cosine });
+            // Get configuration from AI:Embedding to decide vector size
+            var embedConfig = _config.GetSection("AI:Embedding");
+            var provider = embedConfig["Provider"];
+            
+            // OpenAI text-embedding-3-small uses 1536 dims
+            // Gemini / Ollama (nomic-embed-text) uses 768 dims
+            uint dims = (provider == "Gemini" || provider == "Ollama") ? 768u : 1536u;
+            
+            await _client.CreateCollectionAsync(collectionName, new VectorParams { Size = dims, Distance = Distance.Cosine });
         }
     }
 
@@ -63,5 +73,23 @@ public class VectorDbService : IVectorDbService
             Type: r.Payload.ContainsKey("Type") ? r.Payload["Type"].StringValue : "",
             Score: r.Score
         ));
+    }
+
+    public async Task DeleteByDocumentIdAsync(string collectionName, string documentId)
+    {
+        await _client.DeleteAsync(collectionName, new Filter
+        {
+            Must = { new Condition { Field = new FieldCondition { Key = "DocumentId", Match = new Match { Text = documentId } } } }
+        });
+    }
+
+    public async Task<IEnumerable<string>> GetContentByDocumentIdAsync(string collectionName, string documentId)
+    {
+        var points = await _client.ScrollAsync(collectionName, new Filter
+        {
+            Must = { new Condition { Field = new FieldCondition { Key = "DocumentId", Match = new Match { Text = documentId } } } }
+        });
+
+        return points.Result.Select(p => p.Payload["text"].StringValue);
     }
 }
